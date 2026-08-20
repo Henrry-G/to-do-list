@@ -60,6 +60,13 @@ html, body {
   overflow: hidden;
   cursor: pointer;
   transition: opacity 0.5s ease, visibility 0.5s ease;
+  /* CSS兜底：4秒后自动透明，即使JS出错也不卡住 */
+  animation: splashAutoDismiss 4s ease forwards;
+}
+
+@keyframes splashAutoDismiss {
+  0%, 85% { opacity: 1; visibility: visible; pointer-events: auto; }
+  100% { opacity: 0; visibility: hidden; pointer-events: none; }
 }
 
 .splash-screen.hide {
@@ -471,10 +478,8 @@ html, body {
   gap: 16px;
   width: 100%;
   perspective: 1000px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  max-height: 100%;
   padding: 10px 0 calc(20px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
 }
 
 /* 翻卡容器外层（出场动画） */

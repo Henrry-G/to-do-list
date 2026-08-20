@@ -772,27 +772,30 @@ function initSplash() {
   const splash = document.getElementById('splashScreen');
   if (!splash) return;
 
+  let dismissed = false;
   const enterSplash = () => {
+    if (dismissed) return;
+    dismissed = true;
     splash.classList.add('hide');
-    sound.resume();
-    setTimeout(() => splash.remove(), 500);
+    try { sound.resume(); } catch(e) {}
+    setTimeout(() => { if (splash.parentNode) splash.parentNode.removeChild(splash); }, 500);
   };
 
-  // 点击立即进入
-  splash.addEventListener('click', enterSplash, { once: true });
+  // 点击/触摸立即进入
+  splash.addEventListener('click', enterSplash);
+  splash.addEventListener('touchstart', enterSplash, { passive: true });
 
-  // 2.5秒后自动进入
-  setTimeout(enterSplash, 2500);
+  // 3秒后自动进入（兜底）
+  setTimeout(enterSplash, 3000);
 }
 
 // ============ 初始化 ============
 function init() {
   generateStars();
   initSplash();
+  // 仅当今日清单已生成时才直接跳到清单页；其他情况都留在首页显示抽卡画面
   if (state.todayList.length > 0 && state.luckyCard) {
     showPage('pageList'); renderTaskList(); updateStats();
-  } else if (state.luckyCard) {
-    showPage('pageSelect'); renderBubbles(); renderScheduleList(); updateTotalTime(); updateGenerateBtn();
   }
   initHome();
 }
