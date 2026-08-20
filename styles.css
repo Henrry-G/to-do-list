@@ -26,9 +26,11 @@ html, body {
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   font-family: var(--pixel-font);
   color: var(--text-main);
   overflow-x: hidden;
+  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   -webkit-touch-callout: none;
@@ -85,6 +87,7 @@ html, body {
   display: none;
   min-height: 100vh;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
   animation: pageIn 0.25s ease-out;
   contain: layout style;
@@ -130,8 +133,10 @@ html, body {
   max-width: 420px;
   margin: 0 auto;
   min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
   justify-content: center;
-  padding-top: 5vh;
+  padding: 20px 0;
 }
 
 .home-title-area {
@@ -324,6 +329,10 @@ html, body {
   gap: 24px;
   width: 100%;
   perspective: 1000px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: 100%;
+  padding: 10px 0;
 }
 
 /* 翻卡容器外层（出场动画） */
@@ -337,6 +346,7 @@ html, body {
   perspective: 1000px;
   animation: cardAppear 0.4s ease-out;
   will-change: transform, opacity;
+  flex-shrink: 0;
 }
 
 @keyframes cardAppear {
@@ -563,7 +573,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 90px;
+  padding-bottom: calc(100px + env(safe-area-inset-bottom));
 }
 
 .select-header {
@@ -764,16 +774,21 @@ html, body {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.15s steps(3);
+  overscroll-behavior: contain;
+  animation: fadeIn 0.15s ease-out;
 }
 
 .bubble-editor {
   width: 100%;
   max-width: 340px;
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-y: auto;
   background: var(--bg-dark);
   border: 2px solid var(--neon-cyan);
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.2);
   padding: 16px;
+  overscroll-behavior: contain;
 }
 
 .bubble-editor-header {
@@ -1099,7 +1114,9 @@ html, body {
   justify-content: center;
   padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
   z-index: 10;
-  background: linear-gradient(180deg, transparent 0%, rgba(10,10,26,0.9) 40%);
+  background: linear-gradient(180deg, transparent 0%, rgba(10,10,26,0.95) 30%, rgba(10,10,26,1) 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .btn-generate {
@@ -1117,7 +1134,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-bottom: 30px;
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
 }
 
 .list-header {
@@ -1402,7 +1419,7 @@ html, body {
 /* ============ Toast ============ */
 .toast {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(90px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) translateY(80px);
   padding: 8px 20px;
@@ -1449,8 +1466,8 @@ html, body {
   .stat-value { font-size: 20px; }
   .celebration-emoji { font-size: 56px; }
   .celebration h2 { font-size: 20px; }
-  .toast { bottom: calc(80px + env(safe-area-inset-bottom)); font-size: 11px; }
-  .select-container { padding-bottom: 100px; }
+  .toast { bottom: calc(90px + env(safe-area-inset-bottom)); font-size: 11px; }
+  .select-container { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
   .schedule-item { padding: 10px; gap: 6px; }
   .task-card { padding: 12px; gap: 8px; }
   .total-time-badge { font-size: 11px; padding: 4px 8px; }
@@ -1499,7 +1516,7 @@ html, body {
   .home-logo { font-size: 22px; letter-spacing: 1px; }
   .table-card { width: 16vw; min-width: 46px; height: calc(16vw * 1.5); min-height: 69px; }
   .flip-card { width: 82vw; min-width: 160px; height: calc(82vw * 1.5); min-height: 240px; }
-  .select-container { gap: 8px; }
+  .select-container { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
   .list-container { gap: 8px; }
   .stat-value { font-size: 16px; }
   .task-checkbox { width: 26px; height: 26px; min-width: 26px; min-height: 26px; }
@@ -1530,7 +1547,7 @@ html, body {
   .select-container, .list-container {
     max-width: 720px;
     gap: 10px;
-    padding-bottom: 80px;
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
   }
   .custom-form {
     display: grid;
@@ -1612,7 +1629,7 @@ html, body {
   .btn-primary { min-height: 40px; padding: 8px 20px; font-size: 12px; }
   .select-footer { padding: 4px 12px calc(4px + env(safe-area-inset-bottom)); }
   .btn-generate { min-height: 42px; }
-  .select-container { padding-bottom: 70px; }
+  .select-container { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 }
 
 /* --- 阻止 iOS 双击缩放：所有可点击元素使用 manipulation --- */
