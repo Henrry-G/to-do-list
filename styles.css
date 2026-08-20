@@ -22,6 +22,13 @@
   padding: 0;
 }
 
+html {
+  height: auto;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
 html, body {
   width: 100%;
   min-height: 100vh;
@@ -30,7 +37,6 @@ html, body {
   font-family: var(--pixel-font);
   color: var(--text-main);
   overflow-x: hidden;
-  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   -webkit-touch-callout: none;
@@ -39,6 +45,145 @@ html, body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+/* ============ 启动画面 ============ */
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-black);
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.splash-screen.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: splashAppear 0.6s ease-out;
+  z-index: 2;
+}
+
+@keyframes splashAppear {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.splash-logo {
+  display: flex;
+  gap: 2px;
+  font-family: var(--pixel-font);
+  font-weight: bold;
+}
+
+.splash-pixel {
+  display: inline-block;
+  font-size: 48px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-pink);
+  animation: splashPixelBounce 1.2s ease-in-out infinite;
+}
+
+.splash-pixel:nth-child(1) { animation-delay: 0.0s; }
+.splash-pixel:nth-child(2) { animation-delay: 0.1s; }
+.splash-pixel:nth-child(3) { animation-delay: 0.2s; }
+.splash-pixel:nth-child(4) { animation-delay: 0.3s; }
+.splash-pixel:nth-child(5) { animation-delay: 0.4s; }
+.splash-pixel:nth-child(6) { animation-delay: 0.5s; }
+.splash-pixel:nth-child(7) { animation-delay: 0.6s; }
+
+@keyframes splashPixelBounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.1); color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink), 0 0 20px var(--neon-cyan); }
+}
+
+.splash-tag {
+  font-size: 12px;
+  color: var(--text-light);
+  letter-spacing: 3px;
+  animation: splashTagPulse 2s ease-in-out infinite;
+}
+
+@keyframes splashTagPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; color: var(--neon-yellow); }
+}
+
+.splash-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(74, 74, 138, 0.3);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.splash-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  animation: splashBar 2s ease-out forwards;
+}
+
+@keyframes splashBar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.splash-hint {
+  font-size: 10px;
+  color: var(--text-light);
+  letter-spacing: 2px;
+  opacity: 0.5;
+  animation: splashHintBlink 1s ease-in-out infinite;
+}
+
+@keyframes splashHintBlink {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+.splash-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, var(--neon-cyan), transparent),
+    radial-gradient(1px 1px at 80% 20%, var(--neon-pink), transparent),
+    radial-gradient(1px 1px at 40% 80%, var(--neon-yellow), transparent),
+    radial-gradient(1px 1px at 60% 60%, var(--neon-green), transparent),
+    radial-gradient(1px 1px at 10% 90%, var(--neon-purple), transparent),
+    radial-gradient(1px 1px at 90% 70%, var(--neon-cyan), transparent);
+  animation: splashStars 3s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+
+@keyframes splashStars {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@media (max-width: 480px) {
+  .splash-pixel { font-size: 36px; }
+  .splash-tag { font-size: 10px; letter-spacing: 2px; }
+  .splash-bar { width: 160px; }
+}
+
+@media (max-width: 320px) {
+  .splash-pixel { font-size: 28px; }
+  .splash-bar { width: 120px; }
 }
 
 /* ============ 像素背景 ============ */
@@ -90,7 +235,6 @@ html, body {
   min-height: -webkit-fill-available;
   padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
   animation: pageIn 0.25s ease-out;
-  contain: layout style;
 }
 
 .page.active {
@@ -128,15 +272,13 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
-  min-height: 100vh;
-  min-height: 100dvh;
-  min-height: -webkit-fill-available;
-  justify-content: center;
-  padding: 20px 0;
+  flex-shrink: 0;
+  justify-content: flex-start;
+  padding: 16px 14px calc(30px + env(safe-area-inset-bottom));
 }
 
 .home-title-area {
@@ -151,7 +293,7 @@ html, body {
   text-shadow:
     2px 2px 0 var(--neon-purple),
     4px 4px 0 rgba(0, 0, 0, 0.5);
-  animation: logoPulse 2s steps(4) infinite;
+  animation: logoPulse 2s ease-in-out infinite;
 }
 
 @keyframes logoPulse {
@@ -171,7 +313,7 @@ html, body {
   display: flex;
   justify-content: center;
   padding: 20px 0;
-  animation: fadeIn 0.5s steps(6);
+  animation: fadeIn 0.5s ease;
 }
 
 .btn-start {
@@ -189,9 +331,9 @@ html, body {
   align-items: center;
   gap: 10px;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 240, 255, 0.3);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   letter-spacing: 2px;
-  animation: startBlink 1.5s steps(4) infinite;
+  animation: startBlink 1.5s ease-in-out infinite;
   touch-action: manipulation;
 }
 
@@ -207,7 +349,7 @@ html, body {
 
 .btn-start-icon {
   font-size: 12px;
-  animation: arrowBounce 1s steps(4) infinite;
+  animation: arrowBounce 1s ease-in-out infinite;
 }
 
 @keyframes arrowBounce {
@@ -222,7 +364,7 @@ html, body {
   align-items: center;
   gap: 20px;
   width: 100%;
-  animation: tableAppear 0.4s steps(6);
+  animation: tableAppear 0.4s ease-out;
 }
 
 @keyframes tableAppear {
@@ -326,23 +468,23 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   width: 100%;
   perspective: 1000px;
   overflow-y: auto;
   overscroll-behavior: contain;
   max-height: 100%;
-  padding: 10px 0;
+  padding: 10px 0 calc(20px + env(safe-area-inset-bottom));
 }
 
 /* 翻卡容器外层（出场动画） */
 .flip-card-wrapper {
-  width: 72vw;
-  max-width: 220px;
-  min-width: 180px;
-  height: calc(72vw * 1.5);
-  max-height: 330px;
-  min-height: 270px;
+  width: 60vw;
+  max-width: 200px;
+  min-width: 150px;
+  height: calc(60vw * 1.5);
+  max-height: 260px;
+  min-height: 225px;
   perspective: 1000px;
   animation: cardAppear 0.4s ease-out;
   will-change: transform, opacity;
@@ -443,7 +585,7 @@ html, body {
 
 .card-front-icon {
   font-size: 40px;
-  animation: iconBounce 1.5s steps(4) infinite;
+  animation: iconBounce 1.5s ease-in-out infinite;
 }
 
 @keyframes iconBounce {
@@ -524,7 +666,7 @@ html, body {
   align-items: center;
   gap: 8px;
   box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   letter-spacing: 2px;
   touch-action: manipulation;
 }
@@ -556,7 +698,7 @@ html, body {
   align-items: center;
   justify-content: center;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -574,6 +716,7 @@ html, body {
   flex-direction: column;
   gap: 12px;
   padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
 }
 
 .select-header {
@@ -626,7 +769,7 @@ html, body {
   color: var(--text-main);
   outline: none;
   font-family: var(--pixel-font);
-  transition: border-color 0.1s steps(2);
+  transition: border-color 0.1s ease;
 }
 
 .form-input:focus {
@@ -672,7 +815,7 @@ html, body {
   color: var(--text-light);
   cursor: pointer;
   font-family: var(--pixel-font);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -719,7 +862,7 @@ html, body {
   color: var(--text-light);
   cursor: pointer;
   font-family: var(--pixel-font);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -746,7 +889,7 @@ html, body {
   font-family: var(--pixel-font);
   letter-spacing: 1px;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -853,7 +996,7 @@ html, body {
   font-weight: 700;
   font-family: var(--pixel-font);
   cursor: pointer;
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -887,7 +1030,7 @@ html, body {
   font-weight: 900;
   font-family: var(--pixel-font);
   cursor: pointer;
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   touch-action: manipulation;
 }
 
@@ -918,8 +1061,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.1s steps(2);
-  animation: bubbleFloat 3s steps(6) infinite;
+  transition: all 0.1s ease;
+  animation: bubbleFloat 3s ease-in-out infinite;
   font-family: var(--pixel-font);
   touch-action: manipulation;
 }
@@ -1004,8 +1147,8 @@ html, body {
   cursor: grab;
   position: relative;
   overflow: hidden;
-  animation: breathe 2.5s steps(6) infinite;
-  transition: opacity 0.1s ease, border-color 0.1s steps(2);
+  animation: breathe 2.5s ease-in-out infinite;
+  transition: opacity 0.1s ease, border-color 0.1s ease;
 }
 
 @keyframes breathe {
@@ -1091,7 +1234,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   flex-shrink: 0;
   touch-action: manipulation;
 }
@@ -1135,6 +1278,7 @@ html, body {
   flex-direction: column;
   gap: 12px;
   padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
 }
 
 .list-header {
@@ -1191,7 +1335,7 @@ html, body {
   stroke-linecap: butt;
   stroke-dasharray: 125.6;
   stroke-dashoffset: 125.6;
-  transition: stroke-dashoffset 0.4s steps(8), stroke 0.2s steps(2);
+  transition: stroke-dashoffset 0.4s ease, stroke 0.2s ease;
 }
 
 .ring-text {
@@ -1249,10 +1393,10 @@ html, body {
   background: var(--bg-panel);
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
   cursor: pointer;
-  transition: all 0.1s steps(2);
+  transition: all 0.1s ease;
   position: relative;
   overflow: hidden;
-  animation: taskAppear 0.3s steps(4);
+  animation: taskAppear 0.3s ease-out;
 }
 
 @keyframes taskAppear {
@@ -1280,7 +1424,7 @@ html, body {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s steps(4);
+  transition: all 0.2s ease;
 }
 
 .task-card.done .task-checkbox {
@@ -1295,7 +1439,7 @@ html, body {
   font-weight: 900;
   opacity: 0;
   transform: scale(0);
-  transition: all 0.2s steps(4);
+  transition: all 0.2s ease;
 }
 
 .task-card.done .task-checkbox::after {
@@ -1313,7 +1457,7 @@ html, body {
 .task-name {
   font-size: 14px;
   font-weight: 700;
-  transition: all 0.2s steps(2);
+  transition: all 0.2s ease-out;
 }
 
 .task-card.done .task-name {
@@ -1347,7 +1491,7 @@ html, body {
   border-radius: 50%;
   background: rgba(57, 255, 20, 0.4);
   transform: scale(0);
-  animation: rippleExpand 0.4s steps(6);
+  animation: rippleExpand 0.4s ease-out;
   pointer-events: none;
 }
 
@@ -1375,7 +1519,7 @@ html, body {
   font-size: 64px;
   color: var(--neon-yellow);
   text-shadow: 0 0 20px var(--neon-yellow);
-  animation: celebrate 0.6s steps(6);
+  animation: celebrate 0.6s ease-in-out;
 }
 
 @keyframes celebrate {
@@ -1408,7 +1552,7 @@ html, body {
   position: absolute;
   font-size: 18px;
   pointer-events: none;
-  animation: particleFly 0.8s steps(8) forwards;
+  animation: particleFly 0.8s ease-out forwards;
 }
 
 @keyframes particleFly {
@@ -1430,7 +1574,7 @@ html, body {
   color: var(--text-main);
   z-index: 10000;
   opacity: 0;
-  transition: all 0.2s steps(4);
+  transition: all 0.2s ease;
   white-space: nowrap;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
 }
@@ -1449,7 +1593,7 @@ html, body {
   100% { transform: scale(1); }
 }
 
-.jelly { animation: jellyBounce 0.3s steps(6); }
+.jelly { animation: jellyBounce 0.3s ease-out; }
 
 /* ============ 移动端响应式适配 ============ */
 
@@ -1471,6 +1615,22 @@ html, body {
   .schedule-item { padding: 10px; gap: 6px; }
   .task-card { padding: 12px; gap: 8px; }
   .total-time-badge { font-size: 11px; padding: 4px 8px; }
+
+  /* 翻卡区适配手机视口 */
+  .flip-card-wrapper {
+    width: 55vw;
+    max-width: 180px;
+    height: calc(55vw * 1.5);
+    max-height: 240px;
+  }
+  .card-front-icon { font-size: 32px; }
+  .card-front-title { font-size: 14px; letter-spacing: 2px; }
+  .card-front-message { font-size: 11px; line-height: 1.6; padding: 2px 0; }
+  .card-front-lucky { font-size: 12px; letter-spacing: 1px; padding: 5px 8px; }
+  .card-front-content { padding: 10px 8px; gap: 4px; }
+  .card-front-footer { font-size: 9px; letter-spacing: 2px; }
+  .tarot-reveal { gap: 12px; padding: 6px 0 calc(16px + env(safe-area-inset-bottom)); }
+  .home-container { gap: 12px; padding: 12px 10px calc(24px + env(safe-area-inset-bottom)); }
 }
 
 /* --- 断点2：≤380px 小屏手机（iPhone SE 等） --- */
@@ -1481,11 +1641,23 @@ html, body {
   .btn-start { padding: 10px 20px; font-size: 14px; min-height: 48px; }
   .cards-row { gap: 6px; }
   .table-card { width: 17vw; min-width: 50px; height: calc(17vw * 1.5); min-height: 75px; }
-  .flip-card { width: 78vw; min-width: 170px; height: calc(78vw * 1.5); min-height: 255px; }
-  .card-front-icon { font-size: 32px; }
-  .card-front-title { font-size: 14px; letter-spacing: 2px; }
-  .card-front-message { font-size: 11px; line-height: 1.7; }
-  .card-front-lucky { font-size: 12px; letter-spacing: 1px; padding: 5px 8px; }
+
+  /* 翻卡区更小适配 */
+  .flip-card-wrapper {
+    width: 50vw;
+    max-width: 160px;
+    height: calc(50vw * 1.5);
+    max-height: 220px;
+  }
+  .card-front-icon { font-size: 28px; }
+  .card-front-title { font-size: 13px; letter-spacing: 1px; }
+  .card-front-message { font-size: 10px; line-height: 1.5; padding: 1px 0; }
+  .card-front-lucky { font-size: 11px; letter-spacing: 1px; padding: 4px 6px; }
+  .card-front-content { padding: 8px 6px; gap: 3px; }
+  .card-front-footer { font-size: 8px; letter-spacing: 1px; }
+  .tarot-reveal { gap: 10px; padding: 4px 0 calc(12px + env(safe-area-inset-bottom)); }
+  .home-container { gap: 10px; padding: 10px 8px calc(20px + env(safe-area-inset-bottom)); }
+
   .select-header, .list-header { gap: 8px; }
   .btn-back { width: 40px; height: 40px; min-width: 40px; min-height: 40px; font-size: 14px; }
   .select-title, .list-title { font-size: 15px; letter-spacing: 1px; }
@@ -1515,7 +1687,23 @@ html, body {
   .page { padding: 10px 8px calc(10px + env(safe-area-inset-bottom)); }
   .home-logo { font-size: 22px; letter-spacing: 1px; }
   .table-card { width: 16vw; min-width: 46px; height: calc(16vw * 1.5); min-height: 69px; }
-  .flip-card { width: 82vw; min-width: 160px; height: calc(82vw * 1.5); min-height: 240px; }
+
+  /* 超小屏翻卡区 */
+  .flip-card-wrapper {
+    width: 48vw;
+    max-width: 140px;
+    height: calc(48vw * 1.5);
+    max-height: 200px;
+  }
+  .card-front-icon { font-size: 24px; }
+  .card-front-title { font-size: 12px; }
+  .card-front-message { font-size: 9px; line-height: 1.4; }
+  .card-front-lucky { font-size: 10px; padding: 3px 4px; }
+  .card-front-content { padding: 6px 4px; gap: 2px; }
+  .card-front-footer { font-size: 7px; }
+  .tarot-reveal { gap: 8px; padding: 4px 0 calc(10px + env(safe-area-inset-bottom)); }
+  .home-container { gap: 8px; padding: 8px 6px calc(16px + env(safe-area-inset-bottom)); }
+
   .select-container { padding-bottom: calc(90px + env(safe-area-inset-bottom)); }
   .list-container { gap: 8px; }
   .stat-value { font-size: 16px; }

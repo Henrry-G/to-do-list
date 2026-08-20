@@ -162,7 +162,7 @@ function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(st
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
 }
 
 // ============ 首页：塔罗牌 ============
@@ -269,6 +269,16 @@ function showLuckyCard(card, animate) {
     setTimeout(() => {
       luckyText.classList.add('drop');
       sound.feedback('add');
+      // 滚动到按钮可见位置（如果需要）
+      setTimeout(() => {
+        const btn = document.getElementById('btnGoSelect');
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          if (rect.bottom > window.innerHeight - 20) {
+            document.documentElement.scrollTop += rect.bottom - window.innerHeight + 40;
+          }
+        }
+      }, 400);
     }, 1400);
   } else {
     // 非动画模式，直接显示正面
@@ -296,7 +306,18 @@ document.getElementById('btnBackHome').addEventListener('click', function() {
 // ============ 任务选择页 ============
 function renderBubbles() {
   const cloud = document.getElementById('bubbleCloud');
-  cloud.innerHTML = '';
+  // 已有气泡则只更新选中状态，不重建DOM
+  if (cloud.children.length > 0) {
+    PRESET_TASKS.forEach((task, i) => {
+      const bubble = cloud.children[i];
+      if (!bubble) return;
+      const sel = state.selectedTasks.find(t => t.name === task.name);
+      bubble.classList.toggle('selected', !!sel);
+    });
+    return;
+  }
+  // 首次渲染：创建所有气泡
+  const frag = document.createDocumentFragment();
   PRESET_TASKS.forEach(task => {
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
@@ -305,8 +326,9 @@ function renderBubbles() {
     if (sel) bubble.classList.add('selected');
     bubble.innerHTML = `<span>${task.icon}</span><span>${task.name}</span><span class="bubble-time">${formatTime(task.time)}</span>`;
     bubble.addEventListener('click', () => togglePresetTask(task, bubble));
-    cloud.appendChild(bubble);
+    frag.appendChild(bubble);
   });
+  cloud.appendChild(frag);
 }
 
 function togglePresetTask(task, bubble) {
@@ -475,13 +497,13 @@ document.getElementById('btnAddTask').addEventListener('click', function() {
 // ============ 任务编排列表 ============
 function renderScheduleList() {
   const list = document.getElementById('scheduleList');
-  list.innerHTML = '';
   if (state.selectedTasks.length === 0) {
     list.innerHTML = '<div class="schedule-empty">还没有任务, 从上方添加吧</div>';
     return;
   }
   const startTime = document.getElementById('scheduleStartTime').value || '09:00';
   let currentTime = startTime;
+  const frag = document.createDocumentFragment();
 
   state.selectedTasks.forEach((task, i) => {
     const endTime = addMinutes(currentTime, task.time);
@@ -512,9 +534,11 @@ function renderScheduleList() {
     });
 
     attachDragEvents(item);
-    list.appendChild(item);
+    frag.appendChild(item);
     currentTime = endTime;
   });
+  list.innerHTML = '';
+  list.appendChild(frag);
 }
 
 function addMinutes(timeStr, minutes) {
@@ -555,18 +579,28 @@ function attachDragEvents(el) {
 
   // 触摸拖拽
   let touchStartY = 0, isDragging = false, touchStartIndex = -1;
+  let rafPending = false;
+  let cachedItems = null;
   el.addEventListener('touchstart', function(e) {
     if (e.target.classList.contains('schedule-item-remove')) return;
     const t = e.touches[0]; touchStartY = t.clientY; touchStartIndex = parseInt(this.dataset.index);
+    cachedItems = null; // 清缓存，下次touchmove时重建
   }, { passive: true });
   el.addEventListener('touchmove', function(e) {
     const t = e.touches[0]; const dy = t.clientY - touchStartY;
     if (!isDragging && Math.abs(dy) > 15) { isDragging = true; this.classList.add('dragging'); sound.feedback('drag'); }
     if (isDragging) {
       e.preventDefault();
-      document.querySelectorAll('.schedule-item').forEach(i => i.classList.remove('drag-over'));
-      const target = document.elementFromPoint(t.clientX, t.clientY);
-      if (target) { const ti = target.closest('.schedule-item'); if (ti && ti !== this) ti.classList.add('drag-over'); }
+      if (!rafPending) {
+        rafPending = true;
+        requestAnimationFrame(() => {
+          rafPending = false;
+          if (!cachedItems) cachedItems = document.querySelectorAll('.schedule-item');
+          cachedItems.forEach(i => i.classList.remove('drag-over'));
+          const target = document.elementFromPoint(t.clientX, t.clientY);
+          if (target) { const ti = target.closest('.schedule-item'); if (ti && ti !== el) ti.classList.add('drag-over'); }
+        });
+      }
     }
   }, { passive: false });
   el.addEventListener('touchend', function(e) {
@@ -664,12 +698,12 @@ function toggleTaskDone(index, card, e) {
     spawnParticles(card); sound.jelly(card);
   } else { task.done = false; sound.feedback('deselect'); }
   saveState();
-  setTimeout(() => {
+  requestAnimationFrame(() => {
     card.classList.toggle('done', task.done); updateStats();
     if (state.todayList.every(t => t.done) && state.todayList.length > 0) {
       setTimeout(() => { sound.feedback('celebrate'); spawnCelebrationParticles(); renderTaskList(); }, 300);
     }
-  }, 50);
+  });
 }
 
 function updateStats() {
@@ -733,9 +767,28 @@ document.getElementById('btnNewDay').addEventListener('click', function() {
   saveState(); showPage('pageHome'); initHome();
 });
 
+// ============ 启动画面 ============
+function initSplash() {
+  const splash = document.getElementById('splashScreen');
+  if (!splash) return;
+
+  const enterSplash = () => {
+    splash.classList.add('hide');
+    sound.resume();
+    setTimeout(() => splash.remove(), 500);
+  };
+
+  // 点击立即进入
+  splash.addEventListener('click', enterSplash, { once: true });
+
+  // 2.5秒后自动进入
+  setTimeout(enterSplash, 2500);
+}
+
 // ============ 初始化 ============
 function init() {
   generateStars();
+  initSplash();
   if (state.todayList.length > 0 && state.luckyCard) {
     showPage('pageList'); renderTaskList(); updateStats();
   } else if (state.luckyCard) {
