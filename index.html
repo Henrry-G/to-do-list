@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>CloudDo · 今日待办</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- 像素背景 -->
+  <div class="bg-pixel-grid"></div>
+  <div class="bg-stars" id="bgStars"></div>
+
+  <!-- ============ 首页：塔罗牌抽卡 ============ -->
+  <section id="pageHome" class="page active">
+    <div class="home-container">
+      <div class="home-title-area">
+        <h1 class="home-logo">CloudDo</h1>
+        <p class="home-tagline">▼ 像素待办 · 命运抽卡 ▼</p>
+      </div>
+
+      <!-- 第一步：开始按钮 -->
+      <div class="home-start-area" id="homeStartArea">
+        <button class="btn-start" id="btnStartDraw">
+          <span class="btn-start-icon">▼</span>
+          <span>点击开始今日安排</span>
+          <span class="btn-start-icon">▼</span>
+        </button>
+      </div>
+
+      <!-- 第二步：桌面平铺卡牌 -->
+      <div class="tarot-table" id="tarotTable" style="display:none;">
+        <p class="table-hint">▼ 选择一张卡牌翻开 ▼</p>
+        <div class="cards-row" id="cardsRow"></div>
+      </div>
+
+      <!-- 第三步：翻卡结果区 -->
+      <div class="tarot-reveal" id="tarotReveal" style="display:none;">
+        <div class="flip-card-wrapper" id="flipCardWrapper">
+        <div class="flip-card" id="flipCard">
+          <div class="flip-card-face flip-card-back">
+            <div class="card-back-design">
+              <div class="card-back-star">★</div>
+              <div class="card-back-text">CLOUDDO</div>
+              <div class="card-back-deco">◆◇◆◇◆</div>
+            </div>
+          </div>
+          <div class="flip-card-face flip-card-front">
+            <div class="card-front-content">
+              <div class="card-front-icon" id="luckyIcon">★</div>
+              <div class="card-front-title" id="luckyTitle">今日运势</div>
+              <div class="card-front-divider">━━━━━</div>
+              <div class="card-front-message" id="luckyMessage"></div>
+              <div class="card-front-lucky" id="luckyBigText">开启元气满满的一天</div>
+              <div class="card-front-footer">CLOUDDO</div>
+            </div>
+          </div>
+        </div>
+        </div>
+        <button class="btn-primary" id="btnGoSelect">
+          <span>开始今日计划</span><span class="btn-arrow">▶</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 任务编排页 ============ -->
+  <section id="pageSelect" class="page">
+    <div class="select-container">
+      <div class="select-header">
+        <button class="btn-back" id="btnBackHome">◀</button>
+        <h2 class="select-title">编排今日工作</h2>
+        <div class="total-time-badge" id="totalTimeBadge">
+          <span>⏱</span><span id="totalTime">0</span>
+        </div>
+      </div>
+
+      <div class="pixel-panel custom-task-panel">
+        <h3 class="panel-title">▼ 创建任务</h3>
+        <div class="custom-form">
+          <input type="text" id="customTaskName" placeholder="任务名称..." maxlength="20" class="form-input">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">优先级</label>
+              <div class="priority-picker">
+                <button class="priority-btn" data-priority="high">🔥高</button>
+                <button class="priority-btn active" data-priority="mid">⚡中</button>
+                <button class="priority-btn" data-priority="low">🍃低</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">时长</label>
+              <div class="time-picker">
+                <button class="time-btn" data-time="15">15m</button>
+                <button class="time-btn" data-time="30">30m</button>
+                <button class="time-btn" data-time="60">1h</button>
+                <button class="time-btn" data-time="90">1.5h</button>
+                <button class="time-btn custom-time-btn" data-time="0">自定</button>
+              </div>
+              <input type="number" id="customTaskTime" placeholder="分钟" min="5" max="600" class="form-input custom-time-input" style="display:none;">
+            </div>
+          </div>
+          <button class="btn-add-task" id="btnAddTask">＋ 添加任务</button>
+        </div>
+      </div>
+
+      <div class="pixel-panel preset-bubbles-panel">
+        <h3 class="panel-title">▼ 快速选择</h3>
+        <div class="bubble-cloud" id="bubbleCloud"></div>
+      </div>
+
+      <!-- 快速选择·自定义时间弹窗 -->
+      <div class="bubble-editor-overlay" id="bubbleEditorOverlay" style="display:none;">
+        <div class="bubble-editor">
+          <div class="bubble-editor-header">
+            <span class="bubble-editor-name" id="bubbleEditorName">任务</span>
+            <button class="bubble-editor-close" id="bubbleEditorClose">X</button>
+          </div>
+          <div class="bubble-editor-body">
+            <div class="bubble-editor-field">
+              <label class="form-label">时长 (分钟)</label>
+              <div class="bubble-editor-time-row">
+                <button class="bubble-time-btn" data-bt="15">15</button>
+                <button class="bubble-time-btn" data-bt="30">30</button>
+                <button class="bubble-time-btn" data-bt="45">45</button>
+                <button class="bubble-time-btn" data-bt="60">60</button>
+                <button class="bubble-time-btn" data-bt="90">90</button>
+              </div>
+              <input type="number" id="bubbleEditorTime" placeholder="分钟" min="5" max="600" class="form-input bubble-editor-input">
+            </div>
+            <div class="bubble-editor-field">
+              <label class="form-label">优先级</label>
+              <div class="bubble-editor-priority">
+                <button class="be-priority-btn" data-priority="high">🔥高</button>
+                <button class="be-priority-btn active" data-priority="mid">⚡中</button>
+                <button class="be-priority-btn" data-priority="low">🍃低</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn-add-task" id="bubbleEditorConfirm">＋ 添加到清单</button>
+        </div>
+      </div>
+
+      <div class="pixel-panel schedule-panel">
+        <div class="schedule-header">
+          <h3 class="panel-title">▼ 任务编排</h3>
+          <div class="schedule-start-time">
+            <label>开始</label>
+            <input type="time" id="scheduleStartTime" value="09:00" class="form-input time-input">
+          </div>
+        </div>
+        <p class="drag-hint">长按拖动调整顺序 · 上下浮动表示等待中</p>
+        <div class="schedule-list" id="scheduleList"></div>
+      </div>
+
+      <div class="select-footer">
+        <button class="btn-primary btn-generate" id="btnGenerate" disabled>
+          <span>生成今日清单</span><span class="btn-arrow">▶</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 今日清单页 ============ -->
+  <section id="pageList" class="page">
+    <div class="list-container">
+      <div class="list-header">
+        <button class="btn-back" id="btnBackSelect">◀</button>
+        <div class="list-header-center">
+          <h2 class="list-title" id="listTitle">今日清单</h2>
+          <p class="list-date" id="listDate"></p>
+        </div>
+        <div class="progress-ring" id="progressRing">
+          <svg width="48" height="48">
+            <circle class="ring-bg" cx="24" cy="24" r="20" />
+            <circle class="ring-fill" cx="24" cy="24" r="20" id="ringFill" />
+          </svg>
+          <span class="ring-text" id="ringText">0%</span>
+        </div>
+      </div>
+
+      <div class="list-stats pixel-panel">
+        <div class="stat-item">
+          <span class="stat-value" id="statDone">0</span>
+          <span class="stat-label">已完成</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="statTotal">0</span>
+          <span class="stat-label">总数</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="statTime">0</span>
+          <span class="stat-label">预计时长</span>
+        </div>
+      </div>
+
+      <div class="task-list" id="taskList"></div>
+
+      <div class="celebration" id="celebration" style="display:none;">
+        <div class="celebration-content">
+          <div class="celebration-emoji">★</div>
+          <h2>全部完成!</h2>
+          <p>今天的你超棒的, 去休息一下吧</p>
+          <button class="btn-primary" id="btnNewDay">
+            <span>开启新的一天</span><span class="btn-arrow">▶</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="particle-layer" id="particleLayer"></div>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
